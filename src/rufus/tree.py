@@ -66,11 +66,11 @@ def near_capture(g, v, check_capture, dist, v_pursuer, gamma=1.0):
 
     if v_pursuer:
         _filter = lambda n: (
-            (dist(v.data.loc, n.data.loc) < r) and check_capture(v.data, n.data)
+            (dist(v.data.loc, n.data.loc, v.data.state) < r) and check_capture(v.data, n.data)
         )
     else:
         _filter = lambda n: (
-            (dist(n.data.loc, v.data.loc) < r) and check_capture(n.data, v.data)
+            (dist(n.data.loc, v.data.loc, n.data.state) < r) and check_capture(n.data, v.data)
         )
 
     return list(g.filter_nodes(_filter))
@@ -88,7 +88,7 @@ def nearest_neighbor(g, z, dist):
     Returns:
         (vertex, distance)
     '''
-    return min(map(lambda n: (n, dist(n.data.loc, z)), g.all_nodes_itr()), key=itemgetter(1))[0]
+    return min(map(lambda n: (n, dist(n.data.loc, z, n.data.state)), g.all_nodes_itr()), key=itemgetter(1))[0]
 # end nearest_neighbor
 
 
@@ -107,7 +107,7 @@ def within_radius(g, z, r, dist):
     '''Find all vertices in g that are within radius r of z based on the
     provided distance function.
     '''
-    return list(g.filter_nodes(lambda n: dist(n.data.loc, z) < r))
+    return list(g.filter_nodes(lambda n: dist(n.data.loc, z, n.data.state) < r))
 # end near
 
 

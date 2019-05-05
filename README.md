@@ -7,6 +7,6 @@ Differential Games
 [x] Game analysis
 [x] Game visualization
 [x] Complete, end-to-end example with simple linear motion
-[ ] Solve for complex trajectories
-[ ] Homicidal Chauffer
+[x] Solve for complex trajectories
+[x] Homicidal Chauffer
 [ ] IADS

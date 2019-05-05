@@ -35,22 +35,23 @@ class Actor:
     # end __init__
 
 
-    def steer(self, start, end):
+    def steer(self, start, end, state):
         '''Determine the optimal trajectory from start to end under the
         kinematics of the Actor.
 
         Arguments:
-            start (np.ndarray): the starting location
-            end (np.ndarray):   the ending location
+            start:  the starting location
+            end:    the ending location
+            state:  the initial state
 
         Returns:
             (state, trajectory)
 
             state:
-                np.ndarray, the actor's state at the final position
+                the actor's state at the final position
 
             trajectory:
-                np.ndarray, the optimal trajectory of the Actor from start to end
+                the optimal trajectory of the Actor from start to end
 
         Postcondition:
             a.steer(start, end)[0][0]  == start
@@ -60,7 +61,7 @@ class Actor:
     # end steer
 
 
-    def time(self, start, end):
+    def time(self, start, end, state):
         '''Return the minimum time needed to traverse from start to end.
 
         Arguments:
@@ -70,49 +71,10 @@ class Actor:
         Returns:
             int, the time needed to traverse from start to end
         '''
-        return len(self.steer(start, end)[1])
+        return len(self.steer(start, end, state)[1])
     # end distance
 
 # end Actor
-
-
-class LinearActor(Actor):
-    '''A simple actor for test purposes.
-
-    This actor is infinitely maneuverable and moves with a fixed speed.
-    '''
-    
-    def __init__(self, dt, speed):
-        '''Constructor.
-
-        Arguments:
-            dt:     the time increment
-            speed:  the speed of the actor
-        '''
-        super().__init__(dt)
-        assert speed > 0
-        self._speed = speed
-    # end __init__
-
-
-    def steer(self, start, end):
-        direction = end - start
-        distance = np.linalg.norm(end - start)
-        time = distance / self._speed
-        unit_vector = (direction / distance).reshape((1, -1))
-
-        t = np.arange(0.0, time, self._dt).reshape((-1, 1))
-
-        # lienar actor is stateless, so we just return an empty array
-        return np.array([]), start + self._speed * t * unit_vector
-    # end steer
-
-
-    def time(self, start, end):
-        return np.linalg.norm(end - start)
-    # end time
-
-# end LinearActor
 
 
 class Region:

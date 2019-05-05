@@ -17,7 +17,8 @@ setup(
     install_requires = [
         'treelib >= 1.5.5',
         'matplotlib >= 2.2.2',
-        'numpy >= 1.14.3'
+        'numpy >= 1.14.3',
+        'dubins >= 1.0.1'
     ],
       
     test_suite='rufus.test',

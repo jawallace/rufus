@@ -46,7 +46,7 @@ class Solver:
 
     def extend(self, g, z, actor):
         v_nn = t.nearest_neighbor(g, z, actor.time)
-        state, trajectory = actor.steer(v_nn.data.loc, z)
+        state, trajectory = actor.steer(v_nn.data.loc, z, v_nn.data.state)
 
         # TODO if obstacle free
         nearby = t.near(g, z, actor.time, self._gamma)
@@ -55,7 +55,7 @@ class Solver:
         cost_min = t.time(g, v_min) + len(trajectory)
 
         for v in nearby:
-            candidate_state, candidate_trajectory = actor.steer(v.data.loc, z)
+            candidate_state, candidate_trajectory = actor.steer(v.data.loc, z, v.data.state)
             cost = t.time(g, v) + len(candidate_trajectory)
 
             if cost < cost_min: # TODO and obstacle free
@@ -71,7 +71,7 @@ class Solver:
             if v == v_min:
                 continue
 
-            candidate_state, candidate_trajectory = actor.steer(v_new.data.loc, v.data.loc)
+            candidate_state, candidate_trajectory = actor.steer(v_new.data.loc, v.data.loc, v_new.data.state)
             cost = t.time(g, v)
             new_cost = t_v_new + len(candidate_trajectory)
             if t.time(g, v) > new_cost: # TODO and obstacle free

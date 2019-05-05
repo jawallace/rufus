@@ -10,6 +10,7 @@ Visualization tools for rufus.
 '''
 
 # Standard Imports
+import random
 
 # External Imports
 import numpy as np
@@ -30,10 +31,10 @@ def plot_trajectory(path, trajectory, **kwargs):
 # end plot_trajectory
 
 
-def _plot_trajectory_2d(path, trajectory, **kwargs):
+def _plot_trajectory_2d(path, trajectory, vertexweight=0.25, **kwargs):
     '''Plot a single 2d trajectory'''
     vertices = np.vstack([p.loc for p in path])
-    plt.scatter(vertices[:, 0], vertices[:, 1], **kwargs)
+    plt.scatter(vertices[:, 0], vertices[:, 1], vertexweight, **kwargs)
     plt.plot(trajectory[:, 0], trajectory[:, 1], **kwargs)
 # end _plot_trajectory_2d
 
@@ -46,11 +47,51 @@ def _plot_trajectory_3d(path, trajectory, **kwargs):
 # end _plot_trajectory_3d
 
 
-def plot_tree(tree, **kwargs):
+def plot_tree(tree, samples=None, **kwargs):
+    '''Plot a tree.
+
+    If samples is None, all branches will be plotted. Otherwise, ``samples``
+    branches of the tree will be randomly selected and plotted.
+
+    Arguments:
+        tree:       the tree to plot
+        samples:    the number of branches to plot
+        **kwargs:   keyword arguments to be passed to matplotlib
+
+    Returns:
+        None
+
+    Postcondition:
+        the active matplotlib plot will be populated with the tree
+        visualization.
+    '''
+    if samples is None:
+        _plot_nodes(tree.all_nodes_itr(), **kwargs)
+        return
+
+    leaves = list(tree.leaves())
+    random.shuffle(list(tree.leaves()))
+
+    selected = leaves[:samples]
+    nodes = []
+    for l in selected:
+        cur = l
+        while not cur.is_root():
+            nodes.append(cur)
+            cur = tree.parent(cur.identifier)
+
+    nodes.append(tree[tree.root])
+    nodes = set(nodes)
+
+    _plot_nodes(nodes, **kwargs)
+# end plot_tree
+
+
+def _plot_nodes(nodes, **kwargs):
     vertices = []
     is_3d = None
 
-    for node in tree.all_nodes_itr():
+    for node in nodes:
         if is_3d is None:
             if node.data.loc.shape[0] == 2:
                 is_3d = False
@@ -74,5 +115,5 @@ def plot_tree(tree, **kwargs):
         plt.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], **kwargs)
     else:
         plt.scatter(vertices[:, 0], vertices[:, 1], **kwargs)
-# end plot_tree
+# end plot_nodes
 
