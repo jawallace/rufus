@@ -15,11 +15,14 @@ This module contains the implementation of the solver for the differential game
 import numpy as np
 
 # Local Imports
+from rufus.analysis import GameSolution
+from rufus.game import Actor, Region, Vertex
+import rufus.tree as t
 
 
 class Solver:
 
-    def __init__(self, dt, space, pursuer, evader, check_capture):
+    def __init__(self, dt, space, pursuer, evader, check_capture, gamma=1.0):
         '''Constructor.
 
         Arguments:
@@ -29,6 +32,7 @@ class Solver:
             evader:         the evader Actor
             check_capture:  a predicate that checks if a pair of vertices
                             (v_p, v_e) are members of the capture set
+            gamma:          scaling constant, as described in Karaman et al.
         '''
         self._dt = dt
         self._space = space
@@ -40,7 +44,7 @@ class Solver:
 
     def extend(self, g, z, actor):
         v_nn = t.nearest_neighbor(g, z, actor.distance)
-        trajectory = actor.steer(v_nn.data.loc, z)
+        state, trajectory = actor.steer(v_nn.data.loc, z)
 
         # TODO if obstacle free
         nearby = t.near(g, z)
@@ -49,26 +53,28 @@ class Solver:
         cost_min = t.time(g, v_min) + len(trajectory)
 
         for v in nearby:
-            candidate_trajectory = actor.steer(v.data.loc, z)
+            candidate_state, candidate_trajectory = actor.steer(v.data.loc, z)
             cost = t.time(g, v) + len(candidate_trajectory)
 
             if cost < cost_min: # TODO and obstacle free
                 v_min = v
                 trajectory = candidate_trajectory
+                state = candidate_state
                 cost_min = cost
 
-        v_new = g.create_node(parent=v_min, data=Vertex(z, trajectory))
+        v_new = g.create_node(parent=v_min, data=Vertex(z, state, trajectory))
         t_v_new = t.time(g, v_new)
 
         for v in nearby:
             if v == v_min:
                 continue
 
-            candidate_trajectory = actor.steer(v_new.data.loc, v.data.loc)
+            candidate_state, candidate_trajectory = actor.steer(v_new.data.loc, v.data.loc)
             cost = t.time(g, v)
             new_cost = t_v_new + len(candidate_trajectory)
             if t.time(g, v) > new_cost: # TODO and obstacle free
                 v.data.trajectory = candidate_trajectory 
+                v.data.state = candidate_state
                 g.move(v, v_new)
 
         return v_new, t_v_new
@@ -99,7 +105,7 @@ class Solver:
                     if t_v_p_new <= t.time(g_e, v_e):
                         t.remove(g_e, v_e)
 
-        return g_e, g_p
+        return GameSolution(g_e, g_p)
     # end solve
 
 # end Solver

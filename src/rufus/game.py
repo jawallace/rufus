@@ -110,32 +110,80 @@ class LinearActor(Actor):
 # end LinearActor
 
 
-class GameSpace:
-    '''Represents the game space.
+class Region:
+    '''Represents a region in game space.
 
-    Arguments:
-        lower:  the lower bound of each dimension
-        upper:  the upper bound of each dimension
+    Concrete implementations of this class must override the 
+    check_containment and sample methods.
+
+    A point can be checked if it belongs to the region as follows:
+
+        r = SomeConcreteRegion(...) 
+
+        pt = np.array([10.0, 14.0, 11.0])
+        if pt in region:
+            ...
+
     '''
 
+    def __contains__(self, pt):
+        '''Supports the python in keyword'''
+        return self.check_containment(pt)
+    # end __contains__
 
-    def __init__(self, lower, upper):
-        assert len(lower) == len(upper)
-        assert np.all(upper > lower)
 
-        self._lower = lower
-        self._upper = upper
-        self._range = upper - lower
+    def check_containment(self, pt):
+        '''Check if pt is within the region.
 
-        self._ndim = len(self._range)
-    # end __init__
+        Arguments:
+            pt: the value to check
+
+        Returns:
+            True, if pt belongs to the region
+        '''
+        raise NotImplementedError()
+    # end check_containment
 
 
     def sample(self):
-        return self._range * np.random.sample(self._ndim) + self._lower
+        '''Sample a value from the region.'''
+        raise NotImplementedError()
     # end sample
 
-# end GameSpace
+# end Region
+
+
+class BoxRegion(Region):
+    '''Represents an region that can be described as by an n-orthotope.'''
+    
+    def __init__(self, lower, upper):
+        '''Constructor.
+
+        Arguments:
+            lower: the lower bound
+            upper: the upper bound
+        '''
+        assert len(lower) == len(upper)
+        assert np.all(upper > lower)
+
+        self.lower = lower
+        self.upper = upper
+        self._range = upper - lower
+
+        self.ndim = len(self._range)
+    # end __init__
+
+
+    def check_containment(self, pt):
+        return np.all(self.lower <= pt) and np.all(pt < self.upper)
+    # end check_containment
+
+
+    def sample(self):
+        return self._range * np.random.sample(self.ndim) + self.lower
+    # end sample
+
+# end BoxRegion
 
 
 class Vertex:

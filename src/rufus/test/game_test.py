@@ -16,7 +16,7 @@ import unittest
 import numpy as np
 
 # Local Imports
-from rufus.game import GameSpace, LinearActor
+from rufus.game import BoxRegion, LinearActor
 
 
 class GameTest(unittest.TestCase):
@@ -43,18 +43,17 @@ class GameTest(unittest.TestCase):
     # end test_linear_actor
 
 
-    def test_2d_game_space(self):
+    def test_2d_region(self):
         lower = np.array([0.0, 0.0])
         upper = np.array([100.0, 100.0])
-        gspace = GameSpace(lower, upper)
+        gspace = BoxRegion(lower, upper)
 
         samples = []
         for _ in range(1000):
             s = gspace.sample()
 
             # verify samples fall within the game space
-            self.assertTrue(gspace._lower[0] <= s[0] < gspace._upper[0])
-            self.assertTrue(gspace._lower[1] <= s[1] < gspace._upper[1])
+            self.assertTrue(s in gspace)
 
             samples.append(s)
 
@@ -68,23 +67,20 @@ class GameTest(unittest.TestCase):
         expected_vol = np.product(upper - lower)
 
         self.assertTrue(vol >= 0.9 * expected_vol)
-    # end test_game_space
+    # end test_2d_region
    
 
-    def test_3d_game_space(self):
+    def test_3d_region(self):
         lower = np.array([0.0, 0.0, 0.0])
         upper = np.array([100.0, 100.0, 100.0])
-        gspace = GameSpace(lower, upper)
+        gspace = BoxRegion(lower, upper)
 
         samples = []
         for _ in range(1000):
             s = gspace.sample()
 
             # verify samples fall within the game space
-            self.assertTrue(gspace._lower[0] <= s[0] < gspace._upper[0])
-            self.assertTrue(gspace._lower[1] <= s[1] < gspace._upper[1])
-            self.assertTrue(gspace._lower[2] <= s[2] < gspace._upper[1])
-
+            self.assertTrue(s in gspace)
             samples.append(s)
 
         samples = np.array(samples)
@@ -97,7 +93,7 @@ class GameTest(unittest.TestCase):
         expected_vol = np.product(upper - lower)
 
         self.assertTrue(vol >= 0.9 * expected_vol)
-    # end test_game_space
+    # end test_3d_region
 
 # end GameTest
 
