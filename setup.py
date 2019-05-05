@@ -15,7 +15,6 @@ setup(
     packages = find_packages(where='src'),
     package_dir = {'': 'src'},
     install_requires = [
-        'sympy >= 1.1.1',
         'treelib >= 1.5.5',
         'matplotlib >= 2.2.2',
         'numpy >= 1.14.3'

@@ -34,13 +34,13 @@ class GameSolution:
 
     def pursuer_tree(self):
         '''Get the pursuer's trajectory graph.'''
-        return g_p
+        return self._g_p
     # end pursuer_graph
 
 
     def evader_tree(self):
         '''Get the evader's trajectory graph.'''
-        return g_p
+        return self._g_e
     # end evader_graph
 
 

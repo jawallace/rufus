@@ -62,7 +62,7 @@ def near_capture(g, v, check_capture, dist, v_pursuer, gamma=1.0):
         is the Vertex of the evader. The function should return True is the 
         pursuer can capture the 
     '''
-    r = logball(gamma, len(g))
+    r = logball(gamma, len(g), v.data.loc.shape[0])
 
     if v_pursuer:
         _filter = lambda n: (
@@ -92,15 +92,14 @@ def nearest_neighbor(g, z, dist):
 # end nearest_neighbor
 
 
-def logball(gamma, n):
-    vol = gamma * np.log(n) / n
-    return (3 / (4 * np.pi) * vol)**(1/3)
+def logball(gamma, n, dim):
+    return gamma * (np.log(n) / n)**(1/dim)
 # end logball
 
 
 def near(g, z, dist, gamma=1.0):
     '''Find all vertices in g that are near z.'''
-    return within_radius(g, z, logball(gamma, len(g)), dist)
+    return within_radius(g, z, logball(gamma, len(g), z.shape[0]), dist)
 # end near
 
 

@@ -107,6 +107,11 @@ class LinearActor(Actor):
         return np.array([]), start + self._speed * t * unit_vector
     # end steer
 
+
+    def time(self, start, end):
+        return np.linalg.norm(end - start)
+    # end time
+
 # end LinearActor
 
 
