@@ -17,7 +17,7 @@ import numpy as np
 
 # Local Imports
 from rufus.game import Actor
-
+from rufus.third_party import dubins_airplane
 
 class LinearActor(Actor):
     '''A simple actor for test purposes.
@@ -102,8 +102,66 @@ class DubinsCar(Actor):
         This method is used to find candidate vertices to merge with,
         so a heuristic is acceptable.
         '''
-        return np.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)
+        return np.sqrt(np.sum((start - end)**2))
     # end time
 
 # end DubinsCar
+
+
+class DubinsAirplane(Actor):
+    '''Represents a Dubins Airplane - the 3D analog of a Dubins Car.'''
+
+    def __init__(self, dt, bank_max, gamma_max, airspeed):
+        '''Constructor.
+
+        Arguments:
+            dt:         the time increment
+            bank_max:   the maximum bank angle (in radians)
+            gamma_max:  the maximum gamma angle (in radians)
+            airspeed:   the airspeed of the aircraft
+        '''
+        super().__init__(dt)
+        assert bank_max > 0
+        assert gamma_max > 0
+        assert airspeed > 0
+        
+        self._bank = bank_max
+        self._gamma = gamma_max
+        self._airspeed = airspeed
+        self._rmin = dubins_airplane.MinTurnRadius_DubinsAirplane(airspeed, bank_max)
+    # end __init__
+
+
+    def steer(self, start, end, state):
+        if self.time(start, end, state) < 6 * self._rmin:
+            # DubinsAirplaneMain states that if this condition is not satisfied, it
+            # is unlikely a path can be computed, so we abort
+            print('Unsteerable') 
+            return None, None
+
+        endstate = 2 * np.pi * np.random.rand() - (np.pi / 2)
+        soln = dubins_airplane.DubinsAirplanePath(
+                np.array([start[0], start[1],   start[2],   state,      self._airspeed]),
+                np.array([end[0],   end[1],     end[2],     endstate,   self._airspeed]),
+                self._rmin,
+                self._airspeed
+        )
+
+        path = dubins_airplane.ExtractDubinsAirplanePath(soln, step=self._dt).T
+        endstate = soln['angl_e']
+
+        return endstate, path
+    # end steer
+
+
+    def time(self, start, end, state):
+        '''We use euclidean distance as a heuristic to improve runtime.
+
+        This method is used to find candidate vertices to merge with,
+        so a heuristic is acceptable.
+        '''
+        return np.sqrt(np.sum((start - end)**2))
+    # end time
+
+# end DubinsAirplane
 
